@@ -3,20 +3,24 @@
 <title>Mileage Deduction Calculator for Cleaners | TradeLedger</title><meta name="description" content="Estimate your business mileage deduction and how much tax it could save. Built for house cleaners and other mobile service businesses.">
 <link rel="canonical" href="https://loomenz.github.io/tradeledger/tools/mileage-deduction-calculator.html">
 <meta property="og:title" content="Mileage Deduction Calculator for Cleaners | TradeLedger"><meta property="og:description" content="Estimate your business mileage deduction and how much tax it could save. Built for house cleaners and other mobile service businesses.">
-<meta property="og:image" content="https://loomenz.github.io/tradeledger/cover.png">
+<meta property="og:image" content="https://loomenz.github.io/tradeledger/cover.png"><meta name="theme-color" content="#0f766e">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css"></head><body>
-<header><div class="wrap"><a href="../index.html">TradeLedger</a><nav>
-<a href="../tools/cleaning-price-calculator.html">Price calculator</a>
+<header class="nav"><div class="wrap navin"><a class="brand" href="../index.html"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14b8a6"/><stop offset="1" stop-color="#0f766e"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#lg)"/><path d="M9 21l5-5 4 3 6-8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>TradeLedger</span></a>
+<nav id="menu"><a href="../tools/cleaning-price-calculator.html">Price calculator</a>
 <a href="../tools/cleaning-profit-calculator.html">Profit calculator</a>
-<a href="../guides/how-much-to-charge-for-house-cleaning.html">Guides</a></nav></div></header>
-<main><div class="wrap"><h1>Mileage deduction calculator</h1>
-<p class="lead">Driving between clients is a business expense. Here's roughly what it's worth at tax time.</p>
-<div class="card calc">
-<label for="mpd">Business miles per work day</label><input id="mpd" type="number" value="30">
-<label for="days">Work days per year</label><input id="days" type="number" value="240">
-<label for="rate">Rate per mile ($). Check the current IRS standard rate.</label><input id="rate" type="number" value="0.70" step="0.01">
-<label for="tr">Your combined tax rate % (income + self-employment)</label><input id="tr" type="number" value="25">
-<div class="result"><div>Estimated deduction</div><div class="big" id="ded">$0</div>
+<a href="../tools/mileage-deduction-calculator.html">Mileage</a>
+<a href="../guides/how-much-to-charge-for-house-cleaning.html">Guides</a></nav>
+<a class="btn sm" href="https://ledgercraft002.gumroad.com/l/vpeufb">Get the tracker</a></div></header>
+<main><section class="phero"><div class="glow"></div><div class="wrap narrow">
+<span class="eyebrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h8"/></svg> Free tool</span><h1>Mileage deduction calculator</h1><p class="lead">Driving between clients is a business expense. Here's roughly what it's worth at tax time.</p></div></section><div class="wrap tool">
+<div class="calc reveal"><div class="card fields">
+<div class="f"><label for="mpd">Business miles per work day</label><input id="mpd" type="number" value="30"></div>
+<div class="f"><label for="days">Work days per year</label><input id="days" type="number" value="240"></div>
+<div class="f"><label for="rate">Rate per mile ($). Check the current IRS standard rate.</label><input id="rate" type="number" value="0.70" step="0.01"></div>
+<div class="f"><label for="tr">Your combined tax rate % (income + self-employment)</label><input id="tr" type="number" value="25"></div>
+</div><div class="result"><div>Estimated deduction</div><div class="big" id="ded">$0</div>
 <table><tr><td>Miles per year</td><td id="b1"></td></tr><tr><td>Estimated tax saved</td><td id="b2"></td></tr></table></div>
 </div>
 <script>
@@ -27,10 +31,17 @@ document.querySelectorAll('input').forEach(i=>i.addEventListener('input',calc));
 </script>
 <p>You need a log to claim it: date, where you went, why, and the miles. The tracker below has a mileage tab that totals it for you.
 This is an estimate, not tax advice.</p>
-<div class="cta"><h3>Track every job, expense and mile in one spreadsheet</h3>
-<p>The <strong>Cleaning Business Profit Tracker</strong> shows your real profit, your real hourly rate, what to set aside for taxes,
-and which clients still owe you. It works in Excel and Google Sheets and includes this price calculator.</p>
-<a class="btn" href="https://ledgercraft002.gumroad.com/l/vpeufb">Get the tracker for $19</a></div></div></main>
-<footer><div class="wrap">TradeLedger makes simple money tools for people who run small service businesses.
-Calculators give estimates only and are not tax or legal advice. Contact: tradeledger.tools@gmail.com</div></footer>
+<section class="cta reveal"><div class="ctatext"><span class="eyebrow light"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg> The Profit Tracker</span>
+<h3>Track every job, expense and mile in one spreadsheet</h3>
+<p>See your real profit, your real hourly rate, what to set aside for taxes, and which clients still owe you. Updated automatically.</p>
+<ul class="checks"><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Works in Excel and Google Sheets</li><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Blank tracker + filled-in example</li><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Instant download, no subscription</li></ul>
+<a class="btn big" href="https://ledgercraft002.gumroad.com/l/vpeufb">Get the tracker for $19 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a></div>
+<div class="ctaimg"><img src="../img/dashboard.webp" width="901" height="554" loading="lazy" alt="Profit Tracker dashboard"></div></section></div></main>
+<footer><div class="wrap foot"><div><a class="brand" href="../index.html"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14b8a6"/><stop offset="1" stop-color="#0f766e"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#lg)"/><path d="M9 21l5-5 4 3 6-8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>TradeLedger</span></a>
+<p>Simple money tools for people who run small service businesses.</p></div>
+<div><h4>Free tools</h4><a href="../tools/cleaning-price-calculator.html">Price calculator</a><a href="../tools/cleaning-profit-calculator.html">Profit calculator</a><a href="../tools/mileage-deduction-calculator.html">Mileage calculator</a></div>
+<div><h4>Guides</h4><a href="../guides/how-much-to-charge-for-house-cleaning.html">What to charge</a><a href="../guides/cleaning-business-bookkeeping.html">Bookkeeping</a><a href="../guides/cleaning-business-tax-deductions.html">Tax deductions</a></div>
+<div><h4>Contact</h4><a href="mailto:tradeledger.tools@gmail.com">tradeledger.tools@gmail.com</a><a href="https://ledgercraft002.gumroad.com/l/vpeufb">Profit Tracker</a></div></div>
+<div class="wrap fine">Calculators give estimates only and are not tax or legal advice. © TradeLedger</div></footer>
+<script src="../site.js" defer></script>
 </body></html>
