@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cleaning Business Profit Calculator | Real Hourly Rate | TradeLedger</title><meta name="description" content="Free profit calculator for cleaning businesses. See monthly profit, tax set-aside and your true hourly pay after supplies, gas and overhead.">
+<link rel="canonical" href="https://loomenz.github.io/tradeledger/tools/cleaning-profit-calculator.html">
+<meta property="og:title" content="Cleaning Business Profit Calculator | Real Hourly Rate | TradeLedger"><meta property="og:description" content="Free profit calculator for cleaning businesses. See monthly profit, tax set-aside and your true hourly pay after supplies, gas and overhead.">
+<meta property="og:image" content="https://loomenz.github.io/tradeledger/cover.png">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header><div class="wrap"><a href="../index.html">TradeLedger</a><nav>
+<a href="../tools/cleaning-price-calculator.html">Price calculator</a>
+<a href="../tools/cleaning-profit-calculator.html">Profit calculator</a>
+<a href="../guides/how-much-to-charge-for-house-cleaning.html">Guides</a></nav></div></header>
+<main><div class="wrap"><h1>Cleaning business profit calculator</h1>
+<p class="lead">Find out what you really keep each month, and what you actually earn per hour once everything is paid.</p>
+<div class="card calc">
+<label for="jobs">Jobs per month</label><input id="jobs" type="number" value="40">
+<label for="avg">Average price per job ($)</label><input id="avg" type="number" value="140">
+<label for="hpj">Average hours per job (including driving)</label><input id="hpj" type="number" value="3.5" step="0.5">
+<label for="sup">Supplies per month ($)</label><input id="sup" type="number" value="180">
+<label for="gas">Gas and vehicle per month ($)</label><input id="gas" type="number" value="250">
+<label for="fix">Insurance, phone, software, ads per month ($)</label><input id="fix" type="number" value="150">
+<label for="tax">Tax set-aside % of profit</label><input id="tax" type="number" value="25">
+<div class="result"><div>You keep each month</div><div class="big" id="keep">$0</div>
+<table><tr><td>Revenue</td><td id="a1"></td></tr><tr><td>Costs</td><td id="a2"></td></tr><tr><td>Profit before tax</td><td id="a3"></td></tr>
+<tr><td>Set aside for taxes</td><td id="a4"></td></tr><tr><td>Real hourly pay (after tax)</td><td id="a5"></td></tr><tr><td>Per year you keep</td><td id="a6"></td></tr></table></div>
+</div>
+<script>
+const $=id=>+document.getElementById(id).value||0, f=n=>'$'+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+function calc(){const rev=$('jobs')*$('avg'),cost=$('sup')+$('gas')+$('fix'),p=rev-cost,t=Math.max(0,p*$('tax')/100),k=p-t,h=$('jobs')*$('hpj');
+document.getElementById('keep').textContent=f(k);[rev,cost,p,t,h?k/h:0,k*12].forEach((v,i)=>document.getElementById('a'+(i+1)).textContent=f(v));}
+document.querySelectorAll('input').forEach(i=>i.addEventListener('input',calc));calc();
+</script>
+<h2>Why your "real" hourly rate is lower than you think</h2>
+<p>If you charge $140 for a 3-hour clean, it feels like $46 an hour. Add the drive, the supplies, the insurance and the tax you'll owe,
+and many cleaners are closer to $25 to $30. Knowing the real number tells you when to raise prices and which clients are worth keeping.</p>
+<div class="cta"><h3>Track every job, expense and mile in one spreadsheet</h3>
+<p>The <strong>Cleaning Business Profit Tracker</strong> shows your real profit, your real hourly rate, what to set aside for taxes,
+and which clients still owe you. It works in Excel and Google Sheets and includes this price calculator.</p>
+<a class="btn" href="https://tradeledger.gumroad.com">Get the tracker for $19</a></div></div></main>
+<footer><div class="wrap">TradeLedger makes simple money tools for people who run small service businesses.
+Calculators give estimates only and are not tax or legal advice. Contact: tradeledger.tools@gmail.com</div></footer>
+</body></html>

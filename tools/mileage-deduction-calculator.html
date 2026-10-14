@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mileage Deduction Calculator for Cleaners | TradeLedger</title><meta name="description" content="Estimate your business mileage deduction and how much tax it could save. Built for house cleaners and other mobile service businesses.">
+<link rel="canonical" href="https://loomenz.github.io/tradeledger/tools/mileage-deduction-calculator.html">
+<meta property="og:title" content="Mileage Deduction Calculator for Cleaners | TradeLedger"><meta property="og:description" content="Estimate your business mileage deduction and how much tax it could save. Built for house cleaners and other mobile service businesses.">
+<meta property="og:image" content="https://loomenz.github.io/tradeledger/cover.png">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header><div class="wrap"><a href="../index.html">TradeLedger</a><nav>
+<a href="../tools/cleaning-price-calculator.html">Price calculator</a>
+<a href="../tools/cleaning-profit-calculator.html">Profit calculator</a>
+<a href="../guides/how-much-to-charge-for-house-cleaning.html">Guides</a></nav></div></header>
+<main><div class="wrap"><h1>Mileage deduction calculator</h1>
+<p class="lead">Driving between clients is a business expense. Here's roughly what it's worth at tax time.</p>
+<div class="card calc">
+<label for="mpd">Business miles per work day</label><input id="mpd" type="number" value="30">
+<label for="days">Work days per year</label><input id="days" type="number" value="240">
+<label for="rate">Rate per mile ($). Check the current IRS standard rate.</label><input id="rate" type="number" value="0.70" step="0.01">
+<label for="tr">Your combined tax rate % (income + self-employment)</label><input id="tr" type="number" value="25">
+<div class="result"><div>Estimated deduction</div><div class="big" id="ded">$0</div>
+<table><tr><td>Miles per year</td><td id="b1"></td></tr><tr><td>Estimated tax saved</td><td id="b2"></td></tr></table></div>
+</div>
+<script>
+const $=id=>+document.getElementById(id).value||0;
+function calc(){const m=$('mpd')*$('days'),d=m*$('rate');document.getElementById('ded').textContent='$'+Math.round(d).toLocaleString();
+document.getElementById('b1').textContent=m.toLocaleString();document.getElementById('b2').textContent='$'+Math.round(d*$('tr')/100).toLocaleString();}
+document.querySelectorAll('input').forEach(i=>i.addEventListener('input',calc));calc();
+</script>
+<p>You need a log to claim it: date, where you went, why, and the miles. The tracker below has a mileage tab that totals it for you.
+This is an estimate, not tax advice.</p>
+<div class="cta"><h3>Track every job, expense and mile in one spreadsheet</h3>
+<p>The <strong>Cleaning Business Profit Tracker</strong> shows your real profit, your real hourly rate, what to set aside for taxes,
+and which clients still owe you. It works in Excel and Google Sheets and includes this price calculator.</p>
+<a class="btn" href="https://tradeledger.gumroad.com">Get the tracker for $19</a></div></div></main>
+<footer><div class="wrap">TradeLedger makes simple money tools for people who run small service businesses.
+Calculators give estimates only and are not tax or legal advice. Contact: tradeledger.tools@gmail.com</div></footer>
+</body></html>

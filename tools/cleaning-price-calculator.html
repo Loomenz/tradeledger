@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>House Cleaning Price Calculator (Free) | TradeLedger</title><meta name="description" content="Free house cleaning price calculator. Enter hours, your target hourly pay, supplies and miles to get a price that actually covers your costs.">
+<link rel="canonical" href="https://loomenz.github.io/tradeledger/tools/cleaning-price-calculator.html">
+<meta property="og:title" content="House Cleaning Price Calculator (Free) | TradeLedger"><meta property="og:description" content="Free house cleaning price calculator. Enter hours, your target hourly pay, supplies and miles to get a price that actually covers your costs.">
+<meta property="og:image" content="https://loomenz.github.io/tradeledger/cover.png">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header><div class="wrap"><a href="../index.html">TradeLedger</a><nav>
+<a href="../tools/cleaning-price-calculator.html">Price calculator</a>
+<a href="../tools/cleaning-profit-calculator.html">Profit calculator</a>
+<a href="../guides/how-much-to-charge-for-house-cleaning.html">Guides</a></nav></div></header>
+<main><div class="wrap"><h1>House cleaning price calculator</h1>
+<p class="lead">Most new cleaners underprice because they forget supplies, driving and overhead. This works it out for you.</p>
+<div class="card calc">
+<label for="hrs">Estimated hours on site</label><input id="hrs" type="number" value="3" step="0.5" min="0">
+<label for="crew">Number of cleaners</label><input id="crew" type="number" value="1" min="1">
+<label for="pay">Hourly pay you want per cleaner ($)</label><input id="pay" type="number" value="30" min="0">
+<label for="sup">Supplies for this job ($)</label><input id="sup" type="number" value="8" min="0">
+<label for="mi">Round-trip miles</label><input id="mi" type="number" value="12" min="0">
+<label for="rate">Cost per mile ($)</label><input id="rate" type="number" value="0.70" step="0.01" min="0">
+<label for="oh">Overhead % (insurance, phone, ads)</label><input id="oh" type="number" value="10" min="0">
+<label for="mg">Profit margin %</label><input id="mg" type="number" value="15" min="0">
+<div class="result"><div>Recommended price</div><div class="big" id="price">$0</div>
+<table><tr><td>Labor</td><td id="r1"></td></tr><tr><td>Supplies</td><td id="r2"></td></tr><tr><td>Driving</td><td id="r3"></td></tr>
+<tr><td>Overhead</td><td id="r4"></td></tr><tr><td>Break-even price</td><td id="r5"></td></tr><tr><td>Your effective $ per hour</td><td id="r6"></td></tr></table></div>
+</div>
+<script>
+const $=id=>+document.getElementById(id).value||0, f=n=>'$'+n.toFixed(2);
+function calc(){const labor=$('hrs')*$('crew')*$('pay'),sup=$('sup'),drv=$('mi')*$('rate'),oh=(labor+sup+drv)*$('oh')/100,be=labor+sup+drv+oh,
+price=Math.ceil(be*(1+$('mg')/100)/5)*5,hr=$('hrs')*$('crew')?(price-sup-drv-oh)/($('hrs')*$('crew')):0;
+document.getElementById('price').textContent='$'+price;[labor,sup,drv,oh,be,hr].forEach((v,i)=>document.getElementById('r'+(i+1)).textContent=f(v));}
+document.querySelectorAll('input').forEach(i=>i.addEventListener('input',calc));calc();
+</script>
+<h2>How the price is worked out</h2>
+<p>Labor is hours times cleaners times the pay you want. Supplies and driving are added on top, then overhead covers the costs that don't
+belong to one job, like insurance and your phone bill. The margin is money for the business itself, and the total is rounded up to the nearest $5.</p>
+<p>Never quote below the break-even price. If clients push back, cut the scope (skip the oven, do every other week) rather than your rate.</p>
+<p>Want to go deeper? Read <a href="../guides/how-much-to-charge-for-house-cleaning.html">how much to charge for house cleaning</a>.</p>
+<div class="cta"><h3>Track every job, expense and mile in one spreadsheet</h3>
+<p>The <strong>Cleaning Business Profit Tracker</strong> shows your real profit, your real hourly rate, what to set aside for taxes,
+and which clients still owe you. It works in Excel and Google Sheets and includes this price calculator.</p>
+<a class="btn" href="https://tradeledger.gumroad.com">Get the tracker for $19</a></div></div></main>
+<footer><div class="wrap">TradeLedger makes simple money tools for people who run small service businesses.
+Calculators give estimates only and are not tax or legal advice. Contact: tradeledger.tools@gmail.com</div></footer>
+</body></html>
