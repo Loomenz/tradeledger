@@ -61,6 +61,17 @@ def classify(text):
     return found
 
 
+def owner_pulled(src, row):
+    """True when the permit holder is the property owner, not a contractor."""
+    rule = src.get("owner_pulled")
+    if not rule:
+        return False
+    if "field" in rule:
+        return bool(re.search(rule["match"], str(row.get(rule["field"], "")), re.I))
+    a, b = (re.sub(r"\W", "", str(row.get(k, "")).lower()) for k in rule["same"])
+    return bool(a) and a == b
+
+
 def fetch(src):
     since = (TODAY - dt.timedelta(days=DAYS + 3)).isoformat()
     q = urllib.parse.urlencode({
@@ -94,6 +105,7 @@ def fetch(src):
             "date": date, "address": addr, "zip": first(row, src["zip"])[:5],
             "type": ptype[:80], "desc": desc[:400], "value": value if (value := round(money(first(row, src["value"])))) < 300_000_000 else 0,
             "contractor": contractor, "trades": classify(f"{desc} {ptype}"),
+            "owner": owner_pulled(src, row),
         })
     return out, (sorted(rows[0].keys()) if rows else [])
 
@@ -197,7 +209,7 @@ def alerts_box(city="", trade=""):
     label = " ".join(x for x in [TRADE_NAME.get(trade, ""), "permits in", city] if x) if city else "permits in your city"
     return f"""<section class="alerts reveal" id="alerts"><div class="wrap"><div class="abox">
 <div><span class="eyebrow">{icon('bell', 14)} Daily alerts</span><h2>Get new {e(label if city else label.lower()).replace(TRADE_NAME.get(trade, "~"), TRADE_NAME.get(trade, "").lower())} in your inbox every morning.</h2>
-<p>Pick your city and trade. Every new permit lands in your inbox with the address, scope, job value and contractor, before your competitors drive past the dumpster. Free while in early access.</p></div>
+<p>Pick your city and trade. Every new permit lands in your inbox with the address, scope, job value and contractor, so you know which streets to work before anyone else does. Free while in early access.</p></div>
 <form action="https://formsubmit.co/{ALERT_EMAIL}" method="POST" class="aform">
 <input type="hidden" name="_subject" value="Permit Radar alert signup"><input type="hidden" name="_template" value="table">
 <input type="hidden" name="_next" value="{SITE}/permits/thanks.html"><input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
@@ -222,7 +234,7 @@ def permit_table(items, show_trade=True, limit=300):
     for p in items[:limit]:
         tags = "".join(f'<i class="tag">{e(TRADE_NAME[t])}</i>' for t in p["trades"][:2]) if show_trade else ""
         val = fmt_money(p["value"]) if p["value"] else '<span class="mute">n/a</span>'
-        con = e(p["contractor"]) if p["contractor"] else '<span class="mute">Not listed</span>'
+        con = e(p["contractor"]) if p["contractor"] else ('<i class="tag own">Owner-pulled</i>' if p.get("owner") else '<span class="mute">Not listed</span>')
         rows.append(f'<tr><td class="mono">{nice_date(p["date"])}</td><td><b>{e(p["address"])}</b>{tags}<div class="d">{e(p["desc"][:220]) or e(p["type"])}</div></td>'
                     f'<td class="mono r">{val}</td><td>{con}</td></tr>')
     more = f'<p class="mute small">Showing the {limit} most recent of {len(items):,}. Download the CSV for all of them.</p>' if len(items) > limit else ""
@@ -250,9 +262,9 @@ def write(rel, text):
 def write_csv(rel, items):
     buf = io.StringIO()
     w = csv.writer(buf)
-    w.writerow(["issued", "address", "zip", "permit_type", "description", "job_value", "contractor", "trades"])
+    w.writerow(["issued", "address", "zip", "permit_type", "description", "job_value", "contractor", "owner_pulled", "trades"])
     for p in items:
-        w.writerow([p["date"], p["address"], p["zip"], p["type"], p["desc"], p["value"] or "", p["contractor"], "; ".join(TRADE_NAME[t] for t in p["trades"])])
+        w.writerow([p["date"], p["address"], p["zip"], p["type"], p["desc"], p["value"] or "", p["contractor"], "yes" if p.get("owner") else "", "; ".join(TRADE_NAME[t] for t in p["trades"])])
     write(rel, buf.getvalue())
 
 
@@ -296,8 +308,8 @@ def render_city(src, items, fields):
     body = f"""<section class="hero sm"><div class="glow"></div><div class="wrap">
 <a class="crumb" href="../index.html">{icon('radar', 14)} All cities</a>
 <h1>Building permits in <span class="grad">{e(city)}</span></h1>
-<p class="lead">What {e(city)} is building right now, sorted by trade. Each permit is a homeowner or business that just committed money to a project.</p>
-<div class="stats">{stat(len(items), f'permits, last {DAYS} days')}{value_stat(total, 'total job value')}{stat(len(cards), 'active trades')}</div>
+<p class="lead">What {e(city)} is building right now, sorted by trade: the addresses, the job values and the contractors pulling the work.</p>
+<div class="stats">{stat(len(items), f'permits, last {DAYS} days')}{value_stat(total, 'total job value')}{stat(len(cards), 'active trades')}{stat(sum(1 for p in items if p.get("owner")), 'pulled by the owner') if src.get("owner_pulled") else ''}</div>
 <div class="ctas"><a class="btn" href="#alerts">{icon('bell', 16)} Get daily alerts</a><a class="btn ghost" href="data/all.csv" download>{icon('download', 16)} Download all ({len(items):,})</a></div></div></section>
 <section class="sec"><div class="wrap"><h2>Browse by trade</h2><div class="tgrid">{''.join(cards)}</div></div></section>
 <section class="sec alt"><div class="wrap two"><div class="chart reveal"><h3>All permits per day</h3>{bars(items)}<div class="axis"><span>{DAYS} days ago</span><span>Today</span></div></div>
@@ -329,8 +341,8 @@ def render_hub(cities):
     desc = f"Fresh building permits from {len(cities)} US cities, sorted by trade and refreshed every morning. Find roofing, HVAC, solar, plumbing and remodeling jobs the day they're permitted."
     body = f"""<section class="hero"><div class="glow"></div><div class="grid-bg"></div><div class="wrap herogrid">
 <div><span class="eyebrow">{icon('zap', 14)} Updated every morning</span>
-<h1>Every new permit is a <span class="grad">job lead</span>.</h1>
-<p class="lead">Permit Radar reads the official permit records of {len(cities)} US cities each day and sorts them by trade, so contractors see who just committed to a roof, an HVAC swap or a remodel, and who's doing the work.</p>
+<h1>See who's building <span class="grad">what, where</span>, every morning.</h1>
+<p class="lead">Permit Radar reads the official permit records of {len(cities)} US cities each day and sorts them by trade. Spot the streets heating up, the new builds that will need a fence, a pool or a service plan next, and which contractors are pulling the most work.</p>
 <div class="ctas"><a class="btn big" href="#cities">Browse cities {icon('arrow', 16)}</a><a class="btn ghost big" href="#alerts">{icon('bell', 16)} Get daily alerts</a></div>
 <div class="pills">{pills}</div></div>
 <div class="feed reveal"><div class="fh"><span class="dot"></span> Live feed <span class="mute">· jobs over $20K</span></div>{feed}</div></div>
@@ -341,7 +353,8 @@ def render_hub(cities):
 <div class="step reveal"><span class="ico">{icon('radar', 20)}</span><h3>We sort them by trade</h3><p>Each permit is tagged roofing, HVAC, solar, plumbing, electrical, pools, remodeling and more, with job value and contractor.</p></div>
 <div class="step reveal"><span class="ico">{icon('bell', 20)}</span><h3>You get the leads</h3><p>Browse here, download a CSV for your CRM, or get the new ones emailed to you each morning.</p></div></div>
 <div class="faq"><details><summary>Is this legal to use?</summary><p>Yes. Building permits are public records, and every row here comes from the city's own open-data portal under its open-data terms. We only show business names for contractors, never homeowners' names.</p></details>
-<details><summary>Who uses permit data?</summary><p>Roofers and solar installers follow storm and re-roof permits, HVAC and plumbing shops spot new builds that will need service plans, suppliers and subcontractors find which general contractors are busy, and insurers, lenders and investors track neighborhood activity.</p></details>
+<details><summary>Who uses permit data?</summary><p>Fence, pool, landscaping, gutter and HVAC-service companies find new builds months before move-in. Roofers, solar and window installers canvass the streets where permits are clustering. Subcontractors and suppliers see which general contractors are busiest. Insurers, lenders and investors track where neighborhoods are being upgraded. The permit itself is usually already a contractor's job; the value is in everything around it.</p></details>
+<details><summary>Can I find homeowners doing their own project?</summary><p>Some cities record who pulled the permit. Where they do, owner-pulled permits are flagged in the table and the CSV, since those owners may still be hiring subs.</p></details>
 <details><summary>Why isn't my city here?</summary><p>We add cities that publish permits as open data. Tell us your city in the alert form and we'll prioritize it.</p></details></div></div></section>
 {alerts_box()}"""
     write("index.html", page(title, desc, "permits/index.html", body, 1))
@@ -371,7 +384,8 @@ def main():
             fieldlog[src["slug"]] = fields
             with open(cache, "w") as f:
                 json.dump(items, f, separators=(",", ":"))
-            print(f"{src['slug']}: {len(items)} permits, {sum(1 for p in items if p['contractor'])} with contractor")
+            print(f"{src['slug']}: {len(items)} permits, {sum(1 for p in items if p['contractor'])} with contractor, "
+                  f"{sum(1 for p in items if p['owner'])} owner-pulled")
         except Exception as ex:
             if not os.path.exists(cache):
                 print(f"{src['slug']}: skipped ({ex})")

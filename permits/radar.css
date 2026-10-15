@@ -55,7 +55,7 @@ p{margin:0 0 1em}.lead{color:var(--ink-2);font-size:clamp(1.05rem,1.6vw,1.2rem);
 .scroll{overflow-x:auto;max-height:720px}table{width:100%;border-collapse:collapse;font-size:.92rem}
 th{position:sticky;top:0;background:#111827;text-align:left;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);padding:12px 14px}
 td{padding:13px 14px;border-top:1px solid var(--line);vertical-align:top}tbody tr:hover{background:rgba(45,212,191,.05)}
-td .d{color:var(--ink-2);font-size:.85rem;margin-top:3px;max-width:52ch}.tag{font-style:normal;font-size:.72rem;font-weight:700;color:var(--brand);background:rgba(45,212,191,.12);padding:2px 8px;border-radius:999px;margin-left:8px;white-space:nowrap}
+td .d{color:var(--ink-2);font-size:.85rem;margin-top:3px;max-width:52ch}.tag.own{color:var(--accent);background:rgba(245,158,11,.14)}.tag{font-style:normal;font-size:.72rem;font-weight:700;color:var(--brand);background:rgba(45,212,191,.12);padding:2px 8px;border-radius:999px;margin-left:8px;white-space:nowrap}
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:26px 0 40px}.step{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:24px}
 .ico{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:rgba(45,212,191,.12);color:var(--brand);margin-bottom:14px}.step p{color:var(--ink-2);margin:0}
 .faq details{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 20px;margin-bottom:10px}.faq summary{font-weight:700;cursor:pointer}.faq p{color:var(--ink-2);margin:10px 0 0}

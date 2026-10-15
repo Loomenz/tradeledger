@@ -12,6 +12,7 @@ SOURCES = [
         "desc": ["description"], "type": ["permit_type_desc", "work_class"],
         "value": ["total_job_valuation", "total_valuation_remodel", "building_valuation"],
         "contractor": ["contractor_company_name"], "zip": ["original_zip"],
+        "owner_pulled": {"field": "contractor_trade", "match": r"homeowner|owner"},
         "link": "https://abc.austintexas.gov/web/permit/public-search-other",
     },
     {
@@ -21,6 +22,7 @@ SOURCES = [
         "desc": ["work_description"], "type": ["work_type", "permit_type"],
         "value": ["reported_cost", "total_fee"],
         "contractor": ["contact_1_name"], "contractor_type_key": "contact_1_type",
+        "owner_pulled": {"field": "contact_1_type", "match": r"^owner"},
         "zip": ["community_area"], "link": "https://webapps1.chicago.gov/buildingrecords/",
     },
     {
@@ -44,6 +46,7 @@ SOURCES = [
         "host": "data.nola.gov", "dataset": "rcm3-fn58", "date": "issuedate",
         "address": ["address"], "desc": ["description"], "type": ["type"],
         "value": ["constrval"], "contractor": ["contractors", "contractor"], "zip": [],
+        "owner_pulled": {"same": ["applicant", "owner"]},
         "link": "https://onestopapp.nola.gov/",
     },
     {
@@ -52,6 +55,7 @@ SOURCES = [
         "address": ["streetaddress", "address"], "desc": ["projectdescription"],
         "type": ["permittype"], "value": ["projectvalue"],
         "contractor": ["contractorname", "contractorcompanyname"], "zip": ["zip"],
+        "owner_pulled": {"same": ["applicantname", "ownername"]},
         "link": "https://www.brla.gov/",
     },
     {
@@ -59,6 +63,7 @@ SOURCES = [
         "host": "data.cambridgema.gov", "dataset": "qu2z-8suj", "date": "issue_date",
         "address": ["full_address"], "desc": ["detailed_description_of_work"],
         "type": [], "value": ["total_cost"], "contractor": ["firm_name", "contractor_company"], "zip": [],
+        "owner_pulled": {"field": "applicant_role", "match": r"owner"},
         "link": "https://www.cambridgema.gov/inspection",
     },
 ]
