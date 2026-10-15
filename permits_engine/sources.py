@@ -65,17 +65,17 @@ SOURCES = [
 
 # Trade keywords, matched against the lower-cased description + permit type.
 TRADES = [
-    ("roofing", "Roofing", ["roof", "shingle", "reroof"]),
+    ("roofing", "Roofing", ["reroof", "re-roof", "roofing", "shingle", "roof replace", "replace roof", "replace the roof", "roof repair", "new roof", "tear off", "tear-off", "roof covering", "remove existing roof", "roof over"]),
     ("solar", "Solar", ["solar", "photovoltaic", " pv ", "pv system"]),
     ("hvac", "HVAC", ["hvac", "furnace", "air condition", "heat pump", "mini split", "mini-split", "a/c", "ductwork", "condenser", "mechanical"]),
     ("plumbing", "Plumbing", ["plumb", "water heater", "sewer", "repipe", "backflow", "gas line", "fuel gas"]),
-    ("electrical", "Electrical", ["electric", "panel", "service upgrade", "ev charger", "wiring", "meter"]),
+    ("electrical", "Electrical", ["electric", "panel", "service upgrade", "ev charger", "wiring", " meter "]),
     ("pools", "Pools & spas", ["pool", " spa ", "hot tub"]),
-    ("windows-doors", "Windows & doors", ["window", "door", "skylight"]),
+    ("windows-doors", "Windows & doors", ["window", " door", "doors", "skylight"]),
     ("remodel", "Remodeling", ["remodel", "renovat", "kitchen", "bathroom", "alteration", "interior", "addition"]),
     ("new-homes", "New homes & ADUs", ["new single family", "new residence", "new construction", "new two story", "new one story", "adu", "accessory dwelling", "new sfd", "new duplex"]),
     ("demolition", "Demolition", ["demolition", "demolish", "wreck", " demo "]),
     ("decks-fences", "Decks, fences & patios", ["deck", "fence", "patio", "pergola", "retaining wall"]),
     ("fire-safety", "Fire alarm & sprinkler", ["fire alarm", "sprinkler", "fire suppression"]),
-    ("foundation", "Foundation repair", ["foundation", "underpin", "pier"]),
+    ("foundation", "Foundation repair", ["foundation repair", "underpin", " piers", "foundation stabiliz", "slab repair"]),
 ]
