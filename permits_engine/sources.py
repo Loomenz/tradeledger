@@ -12,7 +12,6 @@ SOURCES = [
         "desc": ["description"], "type": ["permit_type_desc", "work_class"],
         "value": ["total_job_valuation", "total_valuation_remodel", "building_valuation"],
         "contractor": ["contractor_company_name"], "zip": ["original_zip"],
-        "owner_pulled": {"field": "contractor_trade", "match": r"homeowner|owner"},
         "link": "https://abc.austintexas.gov/web/permit/public-search-other",
     },
     {
@@ -22,7 +21,9 @@ SOURCES = [
         "desc": ["work_description"], "type": ["work_type", "permit_type"],
         "value": ["reported_cost", "total_fee"],
         "contractor": ["contact_1_name"], "contractor_type_key": "contact_1_type",
-        "owner_pulled": {"field": "contact_1_type", "match": r"^owner"},
+        # Chicago lists the owner first on nearly every permit, so owner-pulled
+        # means no contractor appears anywhere in the contact list.
+        "owner_pulled": {"no_contact_matching": r"contractor", "contacts": [f"contact_{i}_type" for i in range(1, 9)]},
         "zip": ["community_area"], "link": "https://webapps1.chicago.gov/buildingrecords/",
     },
     {

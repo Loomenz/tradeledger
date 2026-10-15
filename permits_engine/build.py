@@ -66,6 +66,9 @@ def owner_pulled(src, row):
     rule = src.get("owner_pulled")
     if not rule:
         return False
+    if "no_contact_matching" in rule:
+        types = [str(row.get(k, "")) for k in rule["contacts"] if row.get(k)]
+        return bool(types) and not any(re.search(rule["no_contact_matching"], t, re.I) for t in types)
     if "field" in rule:
         return bool(re.search(rule["match"], str(row.get(rule["field"], "")), re.I))
     a, b = (re.sub(r"\W", "", str(row.get(k, "")).lower()) for k in rule["same"])
