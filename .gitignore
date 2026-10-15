@@ -1,0 +1,4 @@
+# Permit Radar pages are generated and deployed by .github/workflows/permit-radar.yml
+/permits/*
+!/permits/radar.css
+__pycache__/

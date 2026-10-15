@@ -1,0 +1,52 @@
+name: permit-radar
+# Builds the whole site, refreshes Permit Radar from city open data and deploys
+# it to GitHub Pages. Needs Settings > Pages > Source set to "GitHub Actions".
+on:
+  schedule:
+    - cron: "17 11 * * *"   # every morning, after cities post yesterday's permits
+  workflow_dispatch:
+  push:
+    branches: [main, claude/project-thread-9nd42q]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: permit-radar
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore yesterday's permit cache
+        uses: actions/cache/restore@v4
+        with:
+          path: permits/data
+          key: permits-${{ github.run_id }}
+          restore-keys: permits-
+      - name: Fetch permits and render pages
+        run: cd permits_engine && python build.py
+      - name: Save permit cache
+        uses: actions/cache/save@v4
+        with:
+          path: permits/data
+          key: permits-${{ github.run_id }}
+      - name: Assemble site
+        run: rsync -a --exclude .git --exclude .github --exclude permits_engine --exclude 'permits/data/*.json' ./ _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
