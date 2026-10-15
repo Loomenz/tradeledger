@@ -1,0 +1,11 @@
+name: probe-lead-feeds
+on:
+  push:
+    branches: [claude/project-thread-9nd42q]
+    paths: [leads_engine/probe.py]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 leads_engine/probe.py
