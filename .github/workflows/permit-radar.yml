@@ -1,5 +1,5 @@
 name: permit-radar
-# Builds the whole site, refreshes Permit Radar from city open data and deploys
+# Builds the whole site, refreshes Permit Radar and Lead Radar from open data and deploys
 # it to GitHub Pages. Needs Settings > Pages > Source set to "GitHub Actions".
 on:
   schedule:
@@ -35,8 +35,21 @@ jobs:
         with:
           path: permits/data
           key: permits-${{ github.run_id }}
+      - name: Restore yesterday's lead history
+        uses: actions/cache/restore@v4
+        with:
+          path: leads/data
+          key: leads-${{ github.run_id }}
+          restore-keys: leads-
+      - name: Fetch distress signals, resolve owners and render leads
+        run: cd leads_engine && python build.py
+      - name: Save lead history
+        uses: actions/cache/save@v4
+        with:
+          path: leads/data
+          key: leads-${{ github.run_id }}
       - name: Assemble site
-        run: rsync -a --exclude .git --exclude .github --exclude permits_engine --exclude 'permits/data/*.json' ./ _site/
+        run: rsync -a --exclude .git --exclude .github --exclude permits_engine --exclude 'permits/data/*.json' --exclude leads_engine --exclude 'leads/data' ./ _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
