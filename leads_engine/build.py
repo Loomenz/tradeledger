@@ -201,7 +201,7 @@ def build_market(m, offline):
             by_addr[(s["city"], s["addr"])].append(s)
         print(f"  {len(signals)} signals on {len(by_addr)} addresses")
         # Only resolve owners for addresses with enough going on to matter, or already known
-        known = {(x["city"].upper(), x["addr"]) for x in prev.values()}
+        known = {(x["city"].upper(), norm_addr(x["address"])) for x in prev.values()}
         wanted = {k for k, v in by_addr.items() if len(v) >= 2 or any(s["key"] != "nuisance" for s in v) or k in known}
         owners = {}
         for city in {c for c, _ in wanted}:
