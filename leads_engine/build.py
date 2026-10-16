@@ -238,7 +238,8 @@ EXTRA_CSS = """
 .why{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:26px}.why div{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:22px}.why b{display:block;margin-bottom:6px}
 .price{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px}.pc{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:26px}.pc.hot{border-color:rgba(245,158,11,.5);background:linear-gradient(180deg,rgba(245,158,11,.08),var(--panel))}
 .pc .amt{font-size:2rem;font-weight:800;letter-spacing:-.03em}.pc .amt small{font-size:.9rem;color:var(--mute);font-weight:600}.pc ul{padding-left:18px;color:var(--ink-2);margin:12px 0 18px}
-@media (max-width:960px){.price,.why{grid-template-columns:1fr}}
+.two{grid-template-columns:1.7fr .7fr}.two>div{min-width:0}.lock{white-space:nowrap}
+@media (max-width:960px){.price,.why,.two{grid-template-columns:1fr}}
 @media (max-width:640px){th:nth-child(4),td:nth-child(4){display:table-cell}th:nth-child(5),td:nth-child(5){display:none}}
 """
 
