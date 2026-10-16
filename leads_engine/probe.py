@@ -1,4 +1,4 @@
-"""Round 2: sample rows, counts and freshness from the promising feeds."""
+"""Round 3: Chicagoland + Northwest Indiana sources."""
 import json, urllib.request, urllib.parse
 
 def get(url, timeout=60):
@@ -6,51 +6,76 @@ def get(url, timeout=60):
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read().decode("utf-8", "replace")
 
-SOCRATA = [
-    ("MD foreclosure notices (statewide)", "opendata.maryland.gov", "w3bc-8mnv", None),
-    ("Prince George's MD foreclosures", "data.princegeorgescountymd.gov", "cni6-nr5g", None),
-    ("Prince George's MD foreclosures 2", "data.princegeorgescountymd.gov", "mnie-hrv7", None),
-    ("Colorado foreclosure filings", "data.colorado.gov", "chpv-m4xq", None),
-    ("Colorado foreclosure sales", "data.colorado.gov", "tn2f-pf3u", None),
-    ("King County WA foreclosure parcels", "data.kingcounty.gov", "nx4x-daw6", None),
-    ("Norfolk VA delinquent taxes", "data.norfolk.gov", "7qie-z5gv", None),
-    ("Richmond VA delinquent taxes 6mo+", "data.richmondgov.com", "83t5-hbac", None),
-    ("Sonoma CA defaulted tax", "data.sonomacounty.ca.gov", "bp8v-uax7", None),
-    ("Clermont OH delinquent tax", "internal.opendata.clermontauditor.org", "q52y-wzm4", None),
-    ("Cook County annual tax sale", "datacatalog.cookcountyil.gov", "55ju-2fs9", None),
-    ("Santa Clara probate cases", "data.sccgov.org", "rh64-rgza", None),
-    ("Cincinnati vacant/foreclosed registration", "data.cincinnati-oh.gov", "w3jp-dfxy", None),
-    ("NYC tax lien sale 90-day list", "data.cityofnewyork.us", "9rz4-mjek", "month"),
-    ("NYC housing code violations", "data.cityofnewyork.us", "wvxf-dwi5", "inspectiondate"),
-    ("Montgomery MD housing violations", "data.montgomerycountymd.gov", "k9nj-z35d", None),
-    ("Chicago building violations", "data.cityofchicago.org", "22u3-xenr", "violation_date"),
-    ("CT monthly foreclosures", "data.ct.gov", "jfkq-xawu", None),
-]
-
-for name, host, ds, order in SOCRATA:
+def socrata(name, host, ds, order=None):
     print(f"\n===== {name} ({host}/{ds})")
     try:
         meta = json.loads(get(f"https://{host}/api/views/{ds}.json"))
-        cols = [c.get("fieldName") for c in meta.get("columns", [])]
-        print("updated", meta.get("rowsUpdatedAt"), "| cols:", cols[:40])
-        cnt = json.loads(get(f"https://{host}/resource/{ds}.json?$select=count(*)"))
-        print("rows", cnt)
+        print("updated", meta.get("rowsUpdatedAt"), "| cols:", [c.get("fieldName") for c in meta.get("columns", [])][:40])
+        print("rows", json.loads(get(f"https://{host}/resource/{ds}.json?$select=count(*)")))
         q = {"$limit": 2}
         if order: q["$order"] = f"{order} DESC"
-        rows = json.loads(get(f"https://{host}/resource/{ds}.json?{urllib.parse.urlencode(q)}"))
-        for r in rows: print(json.dumps(r)[:900])
+        for r in json.loads(get(f"https://{host}/resource/{ds}.json?{urllib.parse.urlencode(q)}")): print(json.dumps(r)[:900])
     except Exception as e:
         print("FAIL", e)
 
-CARTO = [
-    ("philly tables", "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND (table_name ILIKE '%tax%' OR table_name ILIKE '%sheriff%' OR table_name ILIKE '%vacant%' OR table_name ILIKE '%delinq%' OR table_name ILIKE '%foreclos%') LIMIT 40"),
-    ("philly L&I recent violations count 30d", "SELECT count(*) FROM violations WHERE casecreateddate > now() - interval '30 days'"),
-    ("philly opa absentee sample", "SELECT location, owner_1, mailing_street, mailing_city_state, market_value, sale_date, sale_price FROM opa_properties_public WHERE mailing_city_state NOT ILIKE 'PHILADELPHIA%' AND category_code='1' LIMIT 3"),
-]
-for name, sql in CARTO:
-    print(f"\n===== {name}")
+def catalog(name, host, q, limit=12):
+    print(f"\n===== CATALOG {name}: {q}")
     try:
-        d = json.loads(get("https://phl.carto.com/api/v2/sql?q=" + urllib.parse.quote(sql)))
-        print(json.dumps(d.get("rows"))[:1500])
+        d = json.loads(get(f"https://{host}/api/catalog/v1?q={urllib.parse.quote(q)}&only=datasets&limit={limit}" + ("" if host.startswith("api.") else f"&domains={host}")))
+        for r in d.get("results", []):
+            res = r["resource"]; print("-", res.get("name"), "|", r["metadata"].get("domain"), "|", res.get("id"), "|", res.get("updatedAt"))
     except Exception as e:
         print("FAIL", e)
+
+def arcgis_hub(name, q):
+    print(f"\n===== ARCGIS HUB {name}: {q}")
+    try:
+        d = json.loads(get(f"https://hub.arcgis.com/api/v3/datasets?q={urllib.parse.quote(q)}&page[size]=12"))
+        for r in d.get("data", []):
+            a = r["attributes"]; print("-", a.get("name"), "|", a.get("source"), "|", a.get("url", "")[:140], "|", a.get("modified"))
+    except Exception as e:
+        print("FAIL", e)
+
+def raw(name, url, n=1200):
+    print(f"\n===== RAW {name}")
+    try:
+        print(get(url)[:n])
+    except Exception as e:
+        print("FAIL", e)
+
+# Cook County / Chicago
+catalog("cook county", "datacatalog.cookcountyil.gov", "tax sale", 15)
+catalog("cook county", "datacatalog.cookcountyil.gov", "delinquent", 10)
+catalog("cook county", "datacatalog.cookcountyil.gov", "assessor parcel", 10)
+catalog("cook county", "datacatalog.cookcountyil.gov", "sheriff", 10)
+catalog("cook county", "datacatalog.cookcountyil.gov", "probate", 10)
+catalog("cook county", "datacatalog.cookcountyil.gov", "recorder", 10)
+socrata("Cook treasurer annual tax sale", "datacatalog.cookcountyil.gov", "55ju-2fs9")
+socrata("Cook treasurer scavenger sale", "datacatalog.cookcountyil.gov", "ydgz-vkrp")
+socrata("Cook assessor parcel universe", "datacatalog.cookcountyil.gov", "tx2p-k2g9")
+socrata("Cook assessor addresses/mailing", "datacatalog.cookcountyil.gov", "3723-97qp")
+socrata("Chicago building violations", "data.cityofchicago.org", "22u3-xenr", "violation_date")
+socrata("Chicago vacant/abandoned 311", "data.cityofchicago.org", "v6vf-nfxy", "created_date")
+catalog("chicago", "data.cityofchicago.org", "vacant building", 8)
+catalog("chicago", "data.cityofchicago.org", "demolition court", 8)
+catalog("chicago", "data.cityofchicago.org", "water shut", 6)
+# Illinois statewide + collar counties
+catalog("illinois", "data.illinois.gov", "foreclosure", 8)
+catalog("illinois", "data.illinois.gov", "tax sale", 8)
+catalog("all socrata", "api.us.socrata.com", "Will County", 10)
+catalog("all socrata", "api.us.socrata.com", "DuPage", 10)
+catalog("all socrata", "api.us.socrata.com", "Lake County Indiana", 10)
+catalog("all socrata", "api.us.socrata.com", "Indiana tax sale", 10)
+arcgis_hub("lake county in", "Lake County Indiana parcels")
+arcgis_hub("porter county in", "Porter County Indiana parcels")
+arcgis_hub("will county il", "Will County Illinois parcels")
+arcgis_hub("dupage county il", "DuPage County parcels")
+arcgis_hub("tax sale indiana", "tax sale Indiana")
+arcgis_hub("gary indiana", "Gary Indiana vacant")
+# SRI (runs Indiana county tax sales) and Cook sheriff
+raw("SRI tax sale lake county IN", "https://www.sriservices.com/sri-tax-sale-auctions/")
+raw("Cook sheriff foreclosure sales", "https://www.cookcountysheriffil.gov/departments/c-c-s-p-d/civil-process/foreclosure-sales/")
+raw("Cook county clerk of court foreclosure", "https://www.cookcountyclerkofcourt.org/court-divisions/chancery-division/mortgage-foreclosure")
+raw("Lake County IN treasurer", "https://www.lakecountyin.gov/departments/treasurer/tax-sale")
+raw("Indiana gateway", "https://gateway.ifionline.org/")
+raw("Illinois PACER-free: foreclosure listings (fisher)", "https://www.fisherbassett.com/illinois-foreclosure-listings/")
