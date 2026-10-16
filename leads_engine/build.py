@@ -8,7 +8,7 @@ downloads into ../leads. Standard library only; runs daily in GitHub Actions.
   python3 leads_engine/build.py            # fetch live data, then render
   python3 leads_engine/build.py --offline  # re-render from leads/data/*.json
 """
-import csv, datetime as dt, html, io, json, os, re, sys, time, urllib.parse, urllib.request
+import csv, datetime as dt, html, io, json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 from collections import Counter, defaultdict
 
 from sources import MARKETS, ENTITY, RESIDENTIAL
@@ -33,6 +33,12 @@ def get_json(url, timeout=120, tries=3):
         try:
             with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=timeout) as r:
                 return json.load(r)
+        except urllib.error.HTTPError as ex:
+            body = ex.read(400).decode("utf-8", "replace")
+            if ex.code == 400 or i == tries - 1:
+                raise RuntimeError(f"HTTP {ex.code}: {body}") from None
+            print(f"  retry {i + 1}: HTTP {ex.code}")
+            time.sleep(3 * (i + 1))
         except Exception as ex:
             if i == tries - 1:
                 raise
@@ -81,24 +87,45 @@ def fetch_signals(sig):
     return out
 
 
+def columns(host, ds):
+    try:
+        meta = get_json(f"https://{host}/api/views/{ds}.json", timeout=60)
+        return [c.get("fieldName") for c in meta.get("columns", [])]
+    except Exception as ex:
+        print(f"  columns of {ds}: {ex}")
+        return []
+
+
 def fetch_owners(owner, city, addrs):
-    """Look up parcels for a set of normalized addresses, in batches, by address."""
+    """Look up parcels for a set of normalized addresses, in batches, by address.
+    Uses the current-year parcel universe; falls back to the all-years address table."""
     found = {}
     addrs = sorted(addrs)
-    for i in range(0, len(addrs), 40):
+    ds, extra = owner["dataset"], ""
+    print(f"  {ds} columns: {columns(owner['host'], ds)[:30]}")
+    i = 0
+    while i < len(addrs):
         batch = addrs[i:i + 40]
         inlist = ",".join("'" + a.replace("'", "''") + "'" for a in batch)
-        where = f"{owner['city_field']}='{city}' AND {owner['addr_field']} in ({inlist})"
+        where = f"{extra}{owner['city_field']}='{city}' AND {owner['addr_field']} in ({inlist})"
         try:
-            rows = socrata(owner["host"], owner["dataset"], **{"$where": where, "$limit": 2000})
+            rows = socrata(owner["host"], ds, **{"$where": where, "$limit": 2000})
         except Exception as ex:
-            print(f"  owner batch {i // 40} failed: {ex}")
+            print(f"  owner batch {i // 40} on {ds} failed: {ex}")
+            if ds != owner["fallback"]:
+                ds = owner["fallback"]
+                yr = socrata(owner["host"], ds, **{"$select": "max(year) as y"})[0]["y"]
+                extra = f"year='{yr}' AND "
+                print(f"  switching to {ds} (year {yr}); columns: {columns(owner['host'], ds)[:30]}")
+                continue
+            i += 40
             continue
+        i += 40
         for r in rows:
             a = norm_addr(r.get(owner["addr_field"]))
             found.setdefault(a, []).append(r)
         if i % 400 == 0:
-            print(f"  owners: {i + len(batch)}/{len(addrs)} addresses, {len(found)} matched")
+            print(f"  owners: {min(i, len(addrs))}/{len(addrs)} addresses, {len(found)} matched")
     return found
 
 
