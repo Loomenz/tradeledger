@@ -1,57 +1,56 @@
-"""Probe open-data feeds for distressed-property signals: tax delinquency,
-foreclosure / sheriff sale, probate, code violations, vacancy."""
+"""Round 2: sample rows, counts and freshness from the promising feeds."""
 import json, urllib.request, urllib.parse
 
-def get(url, timeout=40):
+def get(url, timeout=60):
     req = urllib.request.Request(url, headers={"User-Agent": "lead-probe/1.0"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read().decode("utf-8", "replace")
 
-CANDIDATES = [
-    # (name, kind, url)
-    ("philly tax delinquencies", "carto", "https://phl.carto.com/api/v2/sql?q=SELECT%20*%20FROM%20real_estate_tax_delinquencies%20LIMIT%202"),
-    ("philly tax delinq count", "carto", "https://phl.carto.com/api/v2/sql?q=SELECT%20count(*)%20FROM%20real_estate_tax_delinquencies"),
-    ("philly L&I violations", "carto", "https://phl.carto.com/api/v2/sql?q=SELECT%20*%20FROM%20violations%20ORDER%20BY%20violationdate%20DESC%20LIMIT%202"),
-    ("philly sheriff sales", "carto", "https://phl.carto.com/api/v2/sql?q=SELECT%20*%20FROM%20sheriff_sales%20LIMIT%202"),
-    ("philly vacant", "carto", "https://phl.carto.com/api/v2/sql?q=SELECT%20*%20FROM%20vacant_indicators_points%20LIMIT%202"),
-    ("philly opa properties", "carto", "https://phl.carto.com/api/v2/sql?q=SELECT%20*%20FROM%20opa_properties_public%20LIMIT%201"),
-    ("cook county tax sale/delinq", "socrata", "https://datacatalog.cookcountyil.gov/api/views/metadata/v1?search=delinquent"),
-    ("cook county catalog foreclosure", "socrata", "https://datacatalog.cookcountyil.gov/api/catalog/v1?q=foreclosure&domains=datacatalog.cookcountyil.gov&limit=5"),
-    ("chicago vacant buildings", "socrata", "https://data.cityofchicago.org/resource/7nii-7srd.json?$limit=2&$order=date_service_request_was_received%20DESC"),
-    ("chicago code violations", "socrata", "https://data.cityofchicago.org/resource/22u3-xenr.json?$limit=2&$order=violation_date%20DESC"),
-    ("nyc catalog lis pendens", "socrata", "https://data.cityofnewyork.us/api/catalog/v1?q=lien%20sale&limit=5"),
-    ("nyc tax lien sale list", "socrata", "https://data.cityofnewyork.us/resource/9rz4-mjek.json?$limit=2"),
-    ("detroit tax foreclosure", "arcgis", "https://services2.arcgis.com/qvkbeam7Wirps6zC/arcgis/rest/services/Tax_Foreclosures/FeatureServer/0/query?where=1%3D1&outFields=*&resultRecordCount=2&f=json"),
-    ("baltimore tax sale", "socrata", "https://data.baltimorecity.gov/api/catalog/v1?q=tax%20sale&limit=5"),
-    ("kc catalog", "socrata", "https://data.kcmo.org/api/catalog/v1?q=delinquent&limit=5"),
-    ("dallas catalog", "socrata", "https://www.dallasopendata.com/api/catalog/v1?q=code%20violation&limit=5"),
-    ("austin code complaints", "socrata", "https://data.austintexas.gov/resource/4r4g-vcty.json?$limit=2"),
-    ("new orleans code enforcement", "socrata", "https://data.nola.gov/resource/3ejt-4nbr.json?$limit=2"),
-    ("new orleans catalog", "socrata", "https://data.nola.gov/api/catalog/v1?q=sheriff%20sale&limit=5"),
-    ("la county assessor", "socrata", "https://data.lacounty.gov/api/catalog/v1?q=delinquent&limit=5"),
-    ("socrata global search delinquent tax", "socrata", "https://api.us.socrata.com/api/catalog/v1?q=delinquent%20tax&only=datasets&limit=15"),
-    ("socrata global search foreclosure", "socrata", "https://api.us.socrata.com/api/catalog/v1?q=foreclosure&only=datasets&limit=15"),
-    ("socrata global search probate", "socrata", "https://api.us.socrata.com/api/catalog/v1?q=probate&only=datasets&limit=10"),
-    ("socrata global search vacant property", "socrata", "https://api.us.socrata.com/api/catalog/v1?q=vacant%20property%20registration&only=datasets&limit=10"),
-    ("socrata global search sheriff sale", "socrata", "https://api.us.socrata.com/api/catalog/v1?q=sheriff%20sale&only=datasets&limit=10"),
-    ("socrata global search code violations", "socrata", "https://api.us.socrata.com/api/catalog/v1?q=code%20violations&only=datasets&limit=15"),
+SOCRATA = [
+    ("MD foreclosure notices (statewide)", "opendata.maryland.gov", "w3bc-8mnv", None),
+    ("Prince George's MD foreclosures", "data.princegeorgescountymd.gov", "cni6-nr5g", None),
+    ("Prince George's MD foreclosures 2", "data.princegeorgescountymd.gov", "mnie-hrv7", None),
+    ("Colorado foreclosure filings", "data.colorado.gov", "chpv-m4xq", None),
+    ("Colorado foreclosure sales", "data.colorado.gov", "tn2f-pf3u", None),
+    ("King County WA foreclosure parcels", "data.kingcounty.gov", "nx4x-daw6", None),
+    ("Norfolk VA delinquent taxes", "data.norfolk.gov", "7qie-z5gv", None),
+    ("Richmond VA delinquent taxes 6mo+", "data.richmondgov.com", "83t5-hbac", None),
+    ("Sonoma CA defaulted tax", "data.sonomacounty.ca.gov", "bp8v-uax7", None),
+    ("Clermont OH delinquent tax", "internal.opendata.clermontauditor.org", "q52y-wzm4", None),
+    ("Cook County annual tax sale", "datacatalog.cookcountyil.gov", "55ju-2fs9", None),
+    ("Santa Clara probate cases", "data.sccgov.org", "rh64-rgza", None),
+    ("Cincinnati vacant/foreclosed registration", "data.cincinnati-oh.gov", "w3jp-dfxy", None),
+    ("NYC tax lien sale 90-day list", "data.cityofnewyork.us", "9rz4-mjek", "month"),
+    ("NYC housing code violations", "data.cityofnewyork.us", "wvxf-dwi5", "inspectiondate"),
+    ("Montgomery MD housing violations", "data.montgomerycountymd.gov", "k9nj-z35d", None),
+    ("Chicago building violations", "data.cityofchicago.org", "22u3-xenr", "violation_date"),
+    ("CT monthly foreclosures", "data.ct.gov", "jfkq-xawu", None),
 ]
 
-for name, kind, url in CANDIDATES:
+for name, host, ds, order in SOCRATA:
+    print(f"\n===== {name} ({host}/{ds})")
+    try:
+        meta = json.loads(get(f"https://{host}/api/views/{ds}.json"))
+        cols = [c.get("fieldName") for c in meta.get("columns", [])]
+        print("updated", meta.get("rowsUpdatedAt"), "| cols:", cols[:40])
+        cnt = json.loads(get(f"https://{host}/resource/{ds}.json?$select=count(*)"))
+        print("rows", cnt)
+        q = {"$limit": 2}
+        if order: q["$order"] = f"{order} DESC"
+        rows = json.loads(get(f"https://{host}/resource/{ds}.json?{urllib.parse.urlencode(q)}"))
+        for r in rows: print(json.dumps(r)[:900])
+    except Exception as e:
+        print("FAIL", e)
+
+CARTO = [
+    ("philly tables", "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND (table_name ILIKE '%tax%' OR table_name ILIKE '%sheriff%' OR table_name ILIKE '%vacant%' OR table_name ILIKE '%delinq%' OR table_name ILIKE '%foreclos%') LIMIT 40"),
+    ("philly L&I recent violations count 30d", "SELECT count(*) FROM violations WHERE casecreateddate > now() - interval '30 days'"),
+    ("philly opa absentee sample", "SELECT location, owner_1, mailing_street, mailing_city_state, market_value, sale_date, sale_price FROM opa_properties_public WHERE mailing_city_state NOT ILIKE 'PHILADELPHIA%' AND category_code='1' LIMIT 3"),
+]
+for name, sql in CARTO:
     print(f"\n===== {name}")
     try:
-        body = get(url)
-        try:
-            d = json.loads(body)
-        except Exception:
-            print(body[:800]); continue
-        if isinstance(d, dict) and "results" in d:
-            for r in d["results"]:
-                res = r.get("resource", {})
-                print("-", res.get("name"), "|", r.get("metadata", {}).get("domain"), "|", res.get("id"), "| updated", res.get("updatedAt"), "| rows", res.get("columns_name", [])[:8] if False else "")
-        elif isinstance(d, dict) and "rows" in d:
-            print(json.dumps(d["rows"])[:1500])
-        else:
-            print(json.dumps(d)[:1500])
+        d = json.loads(get("https://phl.carto.com/api/v2/sql?q=" + urllib.parse.quote(sql)))
+        print(json.dumps(d.get("rows"))[:1500])
     except Exception as e:
         print("FAIL", e)
