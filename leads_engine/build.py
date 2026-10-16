@@ -102,7 +102,10 @@ def fetch_owners(owner, city, addrs):
     found = {}
     addrs = sorted(addrs)
     ds, extra = owner["dataset"], ""
-    print(f"  {ds} columns: {columns(owner['host'], ds)[:30]}")
+    if owner.get("year_filter"):
+        yr = socrata(owner["host"], ds, **{"$select": "max(year) as y"})[0]["y"]
+        extra = f"year='{yr}' AND "
+        print(f"  {ds}: using year {yr}")
     i = 0
     while i < len(addrs):
         batch = addrs[i:i + 40]
@@ -204,6 +207,8 @@ def build_market(m, offline):
         for city in {c for c, _ in wanted}:
             owners.update({(city, a): rows for a, rows in fetch_owners(m["owner"], city, [a for c, a in wanted if c == city]).items()})
         print(f"  resolved {len(owners)}/{len(wanted)} addresses to parcels")
+        missed = sorted(a for k in wanted if k not in owners for a in [k[1]])
+        print(f"  unmatched sample: {missed[:12]}")
         leads = {}
         for key, rows in owners.items():
             parcel, units = pick_parcel(rows)

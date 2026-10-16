@@ -15,8 +15,9 @@ MARKETS = [
         # Who owns it. Socrata, refreshed daily by the Cook County Assessor.
         "owner": {
             "host": "datacatalog.cookcountyil.gov",
-            "dataset": "pabr-t5kh",           # Parcel Universe (current year only)
-            "fallback": "3723-97qp",          # Parcel Addresses (all years)
+            "dataset": "3723-97qp",           # Parcel Addresses (all years; filtered to the latest year)
+            "fallback": "3723-97qp",
+            "year_filter": True,
             "city_field": "prop_address_city_name",
             "addr_field": "prop_address_full",
         },
