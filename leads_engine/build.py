@@ -103,31 +103,37 @@ def fetch_owners(owner, city, addrs):
     addrs = sorted(addrs)
     ds, extra = owner["dataset"], ""
     if owner.get("year_filter"):
-        yr = socrata(owner["host"], ds, **{"$select": "max(year) as y"})[0]["y"]
-        extra = f"year='{yr}' AND "
-        print(f"  {ds}: using year {yr}")
+        # The newest assessment year is only partially loaded for months; take the
+        # last three years and keep the newest row per PIN.
+        yr = int(socrata(owner["host"], ds, **{"$select": "max(year) as y"})[0]["y"])
+        extra = f"year >= '{yr - 2}' AND "
+        print(f"  {ds}: using years {yr - 2}-{yr}")
     i = 0
     while i < len(addrs):
-        batch = addrs[i:i + 40]
+        batch = addrs[i:i + 25]
         inlist = ",".join("'" + a.replace("'", "''") + "'" for a in batch)
         where = f"{extra}{owner['city_field']}='{city}' AND {owner['addr_field']} in ({inlist})"
         try:
-            rows = socrata(owner["host"], ds, **{"$where": where, "$limit": 2000})
+            rows = socrata(owner["host"], ds, **{"$where": where, "$order": "year DESC", "$limit": 8000})
         except Exception as ex:
-            print(f"  owner batch {i // 40} on {ds} failed: {ex}")
+            print(f"  owner batch {i // 25} on {ds} failed: {ex}")
             if ds != owner["fallback"]:
                 ds = owner["fallback"]
                 yr = socrata(owner["host"], ds, **{"$select": "max(year) as y"})[0]["y"]
                 extra = f"year='{yr}' AND "
                 print(f"  switching to {ds} (year {yr}); columns: {columns(owner['host'], ds)[:30]}")
                 continue
-            i += 40
+            i += 25
             continue
-        i += 40
-        for r in rows:
+        i += 25
+        seen_pin = set()
+        for r in rows:  # newest year first, so the first row per PIN wins
+            if r.get("pin") in seen_pin:
+                continue
+            seen_pin.add(r.get("pin"))
             a = norm_addr(r.get(owner["addr_field"]))
             found.setdefault(a, []).append(r)
-        if i % 400 == 0:
+        if i % 500 == 0:
             print(f"  owners: {min(i, len(addrs))}/{len(addrs)} addresses, {len(found)} matched")
     return found
 
