@@ -1,0 +1,66 @@
+name: permit-radar
+# Builds the whole site and refreshes Lead Radar from open data. Permit Radar still
+# runs as a hidden signal feed (its pages are built but not deployed). and deploys
+# it to GitHub Pages. Needs Settings > Pages > Source set to "GitHub Actions".
+on:
+  schedule:
+    - cron: "17 11 * * *"   # every morning, after cities post yesterday's permits
+  workflow_dispatch:
+  push:
+    branches: [main, claude/project-thread-9nd42q]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: permit-radar
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore yesterday's permit cache
+        uses: actions/cache/restore@v4
+        with:
+          path: permits/data
+          key: permits-${{ github.run_id }}
+          restore-keys: permits-
+      - name: Fetch permits and render pages
+        run: cd permits_engine && python build.py
+      - name: Save permit cache
+        uses: actions/cache/save@v4
+        with:
+          path: permits/data
+          key: permits-${{ github.run_id }}
+      - name: Restore yesterday's lead history
+        uses: actions/cache/restore@v4
+        with:
+          path: leads/data
+          key: leads-${{ github.run_id }}
+          restore-keys: leads-
+      - name: Fetch distress signals, resolve owners and render leads
+        run: cd leads_engine && python build.py
+      - name: Save lead history
+        uses: actions/cache/save@v4
+        with:
+          path: leads/data
+          key: leads-${{ github.run_id }}
+      - name: Assemble site
+        run: rsync -a --exclude .git --exclude .github --exclude permits_engine --exclude permits --exclude leads_engine --exclude guides --exclude tools --exclude cover.png --exclude img --exclude style.css --exclude site.js --exclude guides --exclude tools --exclude cover.png --exclude img --exclude style.css --exclude site.js --exclude 'leads/data' ./ _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
