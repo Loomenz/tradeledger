@@ -50,7 +50,7 @@ jobs:
           path: leads/data
           key: leads-${{ github.run_id }}
       - name: Assemble site
-        run: rsync -a --exclude .git --exclude .github --exclude permits_engine --exclude permits --exclude leads_engine --exclude 'leads/data' ./ _site/
+        run: rsync -a --exclude .git --exclude .github --exclude permits_engine --exclude permits --exclude leads_engine --exclude guides --exclude tools --exclude cover.png --exclude img --exclude style.css --exclude site.js --exclude guides --exclude tools --exclude cover.png --exclude img --exclude style.css --exclude site.js --exclude 'leads/data' ./ _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

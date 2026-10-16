@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://loomenz.github.io/tradeledger/sitemap.xml
 Sitemap: https://loomenz.github.io/tradeledger/leads/sitemap.xml

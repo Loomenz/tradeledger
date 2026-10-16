@@ -1,4 +1,4 @@
-"""Lead Radar: distressed-property leads for Northwest Indiana and Chicagoland.
+"""Distress Signal: distressed-property leads for Northwest Indiana and Chicagoland.
 
 Pulls fresh distress signals (code violations, vacant-building reports, ...) from
 official open-data feeds, resolves each property to its owner through the county
@@ -21,7 +21,7 @@ DAYS = 30            # how far back a signal counts as "fresh"
 KEEP = 120           # how long a property stays in the file after its last signal
 ALERT_EMAIL = "tradeledger.tools@gmail.com"
 TODAY = dt.date.today()
-UA = {"User-Agent": "LeadRadar/1.0 (+%s/leads/)" % SITE}
+UA = {"User-Agent": "DistressSignal/1.0 (+%s/leads/)" % SITE}
 e = html.escape
 ENTITY_RE = re.compile(ENTITY, re.I)
 RES_RE = re.compile(RESIDENTIAL)
@@ -294,12 +294,12 @@ def page(title_, desc, path, body, depth, noindex=False):
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{up}leads/radar.css"><style>{EXTRA_CSS}</style></head><body>
-<header class="nav"><div class="wrap navin"><a class="brand" href="{up}leads/index.html"><span class="logo">{icon('home', 18)}</span><span>Lead Radar</span><em>by TradeLedger</em></a>
-<nav><a href="{up}leads/index.html#markets">Markets</a><a href="{up}leads/index.html#how">How it works</a><a href="{up}leads/index.html#pricing">Pricing</a><a href="{up}index.html">Tools</a></nav>
+<header class="nav"><div class="wrap navin"><a class="brand" href="{up}leads/index.html"><span class="logo">{icon('home', 18)}</span><span>Distress Signal</span></a>
+<nav><a href="{up}leads/index.html#markets">Markets</a><a href="{up}leads/index.html#how">How it works</a><a href="{up}leads/index.html#pricing">Pricing</a></nav>
 <a class="btn sm" href="#alerts">{icon('bell', 15)} Get the list</a></div></header>
 <main>{body}</main>
-<footer class="foot"><div class="wrap"><div><b>Lead Radar</b> finds distressed and absentee-owned properties in Northwest Indiana and Chicagoland from official county and city records, refreshed every morning. Updated {TODAY.strftime('%B %-d, %Y')}. Public records only; no credit, phone or email data is shown on this site.</div>
-<div class="fl"><a href="{up}leads/index.html">All markets</a><a href="{up}index.html">TradeLedger</a><a href="mailto:{ALERT_EMAIL}">Contact</a></div></div></footer>
+<footer class="foot"><div class="wrap"><div><b>Distress Signal</b> finds distressed and absentee-owned properties in Northwest Indiana and Chicagoland from official county and city records, refreshed every morning. Updated {TODAY.strftime('%B %-d, %Y')}. Public records only; no credit, phone or email data is shown on this site.</div>
+<div class="fl"><a href="{up}leads/index.html">All markets</a><a href="mailto:{ALERT_EMAIL}">Contact</a></div></div></footer>
 <script>
 const io=new IntersectionObserver(es=>es.forEach(x=>{{if(x.isIntersecting){{x.target.classList.add('in');io.unobserve(x.target)}}}}),{{threshold:.12}});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
@@ -325,7 +325,7 @@ def alerts_box(m=None):
 <div><span class="eyebrow">{icon('bell', 14)} Early access</span><h2>Get the full {e(where)} list with owner names and mailing addresses.</h2>
 <p>Investors, wholesalers and agents: tell us your market and what you buy. We'll send the complete list, the daily new-lead feed, and a price. Skip-traced phone numbers come as an add-on, verified live before you pay for them.</p></div>
 <form action="https://formsubmit.co/{ALERT_EMAIL}" method="POST" class="aform">
-<input type="hidden" name="_subject" value="Lead Radar access request"><input type="hidden" name="_template" value="table">
+<input type="hidden" name="_subject" value="Distress Signal access request"><input type="hidden" name="_template" value="table">
 <input type="hidden" name="_next" value="{SITE}/leads/thanks.html"><input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
 <label>Work email<input type="email" name="email" required placeholder="you@yourcompany.com"></label>
 <label>Market<input type="text" name="market" value="{e(where)}" required></label>
@@ -425,12 +425,12 @@ def render_hub(markets):
                      for n, s in [("Lake County", "Gary, Hammond, Crown Point, IN"), ("Porter County", "Valparaiso, Portage, IN"), ("Will County", "Joliet, Bolingbrook, IL"), ("DuPage County", "Naperville, Wheaton, IL")])
     top = sorted(allv, key=lambda x: -x["score"])[:6]
     feed = "".join(f'<div class="fi"><span class="gr {x["grade"]}">{x["grade"]}</span><b>{e(x["address"])}</b><span>{e(x["city"])}</span><span class="mono r">{x["score"]}</span></div>' for x in top)
-    title_ = "Lead Radar: Distressed Property Leads for Northwest Indiana and Chicagoland"
+    title_ = "Distress Signal: Distressed Property Leads for Northwest Indiana and Chicagoland"
     desc = "Fresh, local, scored distressed-property leads built from official county and city records: code violations, vacant buildings, absentee owners. Refreshed every morning."
     body = f"""<section class="hero"><div class="glow"></div><div class="grid-bg"></div><div class="wrap herogrid">
 <div><span class="eyebrow">{icon('zap', 14)} Refreshed every morning</span>
 <h1>Motivated sellers, <span class="grad">found in the records</span> before anyone calls them.</h1>
-<p class="lead">Lead Radar reads the official records of Chicagoland and Northwest Indiana counties every day: code violations, vacant-building reports, and who actually owns each property and where their mail goes. Then it scores every property so you work the best ones first.</p>
+<p class="lead">Distress Signal reads the official records of Chicagoland and Northwest Indiana counties every day: code violations, vacant-building reports, and who actually owns each property and where their mail goes. Then it scores every property so you work the best ones first.</p>
 <div class="ctas"><a class="btn big" href="#markets">Browse markets {icon('arrow', 16)}</a><a class="btn ghost big" href="#alerts">{icon('bell', 16)} Get the list</a></div></div>
 <div class="feed reveal"><div class="fh"><span class="dot"></span> Top leads today</div>{feed}</div></div>
 <div class="wrap"><div class="stats big">{stat(len(allv), 'properties flagged')}{stat(sum(1 for x in allv if x['grade'] == 'A'), 'grade A leads')}{stat(sum(1 for x in allv if x['absentee']), 'absentee owners')}{stat(len(markets), 'counties live')}</div></div></section>
@@ -451,8 +451,8 @@ def render_hub(markets):
 <details><summary>What about tax sales, foreclosures and probate?</summary><p>Those lists exist for every county here but are not published as open data. We are adding them county by county as we can source them reliably. Subscribers get each new signal type as it lands.</p></details></div></div></section>
 {alerts_box()}"""
     write("index.html", page(title_, desc, "leads/index.html", body, 1))
-    write("thanks.html", page("Request received | Lead Radar", "We'll be in touch.", "leads/thanks.html",
-          f'<section class="hero sm"><div class="glow"></div><div class="wrap"><h1>Got it.</h1><p class="lead">We\'ll reply personally within a day with the list and a price.</p><a class="btn" href="index.html">Back to Lead Radar</a></div></section>', 1, noindex=True))
+    write("thanks.html", page("Request received | Distress Signal", "We'll be in touch.", "leads/thanks.html",
+          f'<section class="hero sm"><div class="glow"></div><div class="wrap"><h1>Got it.</h1><p class="lead">We\'ll reply personally within a day with the list and a price.</p><a class="btn" href="index.html">Back to Distress Signal</a></div></section>', 1, noindex=True))
     urls = [f"{SITE}/leads/index.html"] + [f"{SITE}/leads/{m['slug']}/index.html" for m, _ in markets]
     write("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
           "".join(f"<url><loc>{u}</loc><lastmod>{TODAY.isoformat()}</lastmod><changefreq>daily</changefreq></url>" for u in urls) + "</urlset>")
