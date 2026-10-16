@@ -287,13 +287,13 @@ def page(title_, desc, path, body, depth, noindex=False):
 <meta property="og:image" content="{SITE}/cover.png"><meta name="theme-color" content="#070b14">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{up}permits/radar.css"><style>{EXTRA_CSS}</style></head><body>
+<link rel="stylesheet" href="{up}leads/radar.css"><style>{EXTRA_CSS}</style></head><body>
 <header class="nav"><div class="wrap navin"><a class="brand" href="{up}leads/index.html"><span class="logo">{icon('home', 18)}</span><span>Lead Radar</span><em>by TradeLedger</em></a>
 <nav><a href="{up}leads/index.html#markets">Markets</a><a href="{up}leads/index.html#how">How it works</a><a href="{up}leads/index.html#pricing">Pricing</a><a href="{up}index.html">Tools</a></nav>
 <a class="btn sm" href="#alerts">{icon('bell', 15)} Get the list</a></div></header>
 <main>{body}</main>
 <footer class="foot"><div class="wrap"><div><b>Lead Radar</b> finds distressed and absentee-owned properties in Northwest Indiana and Chicagoland from official county and city records, refreshed every morning. Updated {TODAY.strftime('%B %-d, %Y')}. Public records only; no credit, phone or email data is shown on this site.</div>
-<div class="fl"><a href="{up}leads/index.html">All markets</a><a href="{up}permits/index.html">Permit Radar</a><a href="{up}index.html">TradeLedger</a><a href="mailto:{ALERT_EMAIL}">Contact</a></div></div></footer>
+<div class="fl"><a href="{up}leads/index.html">All markets</a><a href="{up}index.html">TradeLedger</a><a href="mailto:{ALERT_EMAIL}">Contact</a></div></div></footer>
 <script>
 const io=new IntersectionObserver(es=>es.forEach(x=>{{if(x.isIntersecting){{x.target.classList.add('in');io.unobserve(x.target)}}}}),{{threshold:.12}});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
@@ -475,6 +475,8 @@ def main():
     if not markets:
         sys.exit("no markets rendered")
     render_hub(markets)
+    import shutil
+    shutil.copy(os.path.join(ROOT, "permits", "radar.css"), os.path.join(OUT, "radar.css"))
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 name: permit-radar
-# Builds the whole site, refreshes Permit Radar and Lead Radar from open data and deploys
+# Builds the whole site and refreshes Lead Radar from open data. Permit Radar still
+# runs as a hidden signal feed (its pages are built but not deployed). and deploys
 # it to GitHub Pages. Needs Settings > Pages > Source set to "GitHub Actions".
 on:
   schedule:
@@ -49,7 +50,7 @@ jobs:
           path: leads/data
           key: leads-${{ github.run_id }}
       - name: Assemble site
-        run: rsync -a --exclude .git --exclude .github --exclude permits_engine --exclude 'permits/data/*.json' --exclude leads_engine --exclude 'leads/data' ./ _site/
+        run: rsync -a --exclude .git --exclude .github --exclude permits_engine --exclude permits --exclude leads_engine --exclude 'leads/data' ./ _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
